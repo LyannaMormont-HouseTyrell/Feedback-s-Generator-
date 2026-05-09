@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>AI Feedback Studio | Smart Message Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #e9eef3 0%, #dfe4ea 100%);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    /* modern glass-morphism container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(0px);
+      border-radius: 2rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.05);
+      padding: 2rem 2rem 2.5rem;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #1f1f2e, #2c3e4e);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .subhead {
+      text-align: center;
+      color: #5a6874;
+      font-weight: 500;
+      font-size: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: inline-block;
+      width: auto;
+      margin: 0 auto 1.2rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .tagline {
+      text-align: center;
+      color: #4b5563;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+
+    /* tile section - modern cards */
+    .tiles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+
+    .tile {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.9rem 0.5rem;
+      border-radius: 2rem;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.05rem;
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      background: #ffffff;
+      border: 1.5px solid #cfdfed;
+      color: #1e2f3e;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+
+    .tile:hover {
+      transform: translateY(-4px);
+      background: #f8fafd;
+      border-color: #94a3b8;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+    }
+
+    .active {
+      background: #0a0c10;
+      color: white;
+      border-color: #0a0c10;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    }
+
+    .active:hover {
+      background: #1e293b;
+      border-color: #1e293b;
+    }
+
+    /* control bar + generate button */
+    .action-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 1rem 0 1.5rem;
+      background: #f1f5f9;
+      border-radius: 3rem;
+      padding: 0.5rem 1rem;
+    }
+
+    .count-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: white;
+      padding: 0.2rem 1rem 0.2rem 1.2rem;
+      border-radius: 2.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .count-selector label {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    #feedbackCount {
+      width: 75px;
+      padding: 0.5rem 0.4rem;
+      border-radius: 2rem;
+      border: 1px solid #cbd5e1;
+      font-weight: 600;
+      text-align: center;
+      background: #fff;
+      font-size: 0.9rem;
+    }
+
+    .generate-btn {
+      background: #0f172a;
+      border: none;
+      padding: 0.7rem 2rem;
+      border-radius: 3rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .generate-btn:hover {
+      background: #2d3a4b;
+      transform: scale(1.02);
+      box-shadow: 0 12px 20px -12px rgba(0,0,0,0.3);
+    }
+
+    /* feedback list grid */
+    .feedback-list {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .feedback-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      border: 1px solid #eef2f8;
+      transition: all 0.2s;
+    }
+
+    .feedback-card:hover {
+      border-color: #cbdde9;
+      background: #fefefe;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+    }
+
+    .number {
+      width: 36px;
+      height: 36px;
+      background: #eef2ff;
+      color: #1e293b;
+      font-weight: 800;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      background: #0f172a;
+      color: white;
+    }
+
+    .feedback-text {
+      flex: 1;
+      font-size: 0.98rem;
+      line-height: 1.45;
+      color: #1e2a3a;
+      font-weight: 500;
+      letter-spacing: -0.2px;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      background: #f1f5f9;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .copy-btn:hover {
+      background: #e2e8f0;
+      transform: scale(0.97);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: #fafcff;
+      border-radius: 2rem;
+      color: #697e94;
+      font-weight: 500;
+      border: 1px dashed #cbd5e1;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #6c7a8a;
+      margin-top: 2rem;
+      border-top: 1px solid #e2edf7;
+      padding-top: 1.2rem;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem;
+      }
+      .container {
+        padding: 1.3rem;
+      }
+      .feedback-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .copy-btn {
+        align-self: flex-end;
+      }
+      .tile {
+        min-width: 100px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>✨ AI Feedback Studio</h1>
+  <div style="text-align: center;">
+    <div class="subhead">⚡ intelligent · contextual · instant</div>
+  </div>
+  <div class="tagline">Tap a category → generate professional feedback messages with AI style</div>
+
+  <!-- enhanced preset tiles: Delivery, Takeaway, Dine-In -->
+  <div class="tiles">
+    <div class="tile active" data-preset="delivery" onclick="selectPreset('delivery', this)">🚚 Delivery</div>
+    <div class="tile" data-preset="takeaway" onclick="selectPreset('takeaway', this)">🥡 Takeaway</div>
+    <div class="tile" data-preset="dinein" onclick="selectPreset('dinein', this)">🍽️ Dine-In</div>
+  </div>
+
+  <!-- interactive count + generate bar -->
+  <div class="action-bar">
+    <div class="count-selector">
+      <label>📋 Number of messages</label>
+      <input type="number" id="feedbackCount" min="1" max="12" value="4" step="1">
+    </div>
+    <button class="generate-btn" onclick="generateFeedbacks()">
+      ✨ Generate AI Feedbacks
+    </button>
+  </div>
+
+  <!-- dynamic feedback container -->
+  <div class="feedback-list" id="feedbackList">
+    <div class="empty-state">
+      💡 Click "Generate AI Feedbacks" — smart messages based on your selected category
+    </div>
+  </div>
+  <footer>
+    ⚙️ AI-generated feedbacks optimized for hospitality, logistics & customer service excellence
+  </footer>
+</div>
+
+<script>
+  // ----------------------------------------------
+  // ENRICHED CONTEXTUAL DATASETS (Category-aware)
+  // Each preset uses tailored words to simulate real intelligent generation
+  // ----------------------------------------------
+
+  // Base pools that adapt based on selected category (dynamic construction)
+  // But we'll define category-specific pools for more relevant & "AI" variation
+  
+  const categoryLexicon = {
+    delivery: {
+      starters: [
+        "Flawless", "Lightning-fast", "Contactless", "Precise", "Reliable", 
+        "Tracking-accurate", "Hassle-free", "Courteous", "On-time", "Seamless",
+        "GPS-synced", "Eco-friendly", "Doorstep", "Careful"
+      ],
+      subjects: [
+        "delivery coordination", "rider professionalism", "route optimization", 
+        "real-time tracking experience", "last-mile execution", "package handling",
+        "temperature maintenance", "dispatch timing", "ETA precision", "driver communication"
+      ],
+      endings: [
+        "ensuring hot food upon arrival.",
+        "with zero misdrops and perfect handover.",
+        "while maintaining safety protocols throughout.",
+        "and customers praised the speed.",
+        "with adaptive routing avoiding delays.",
+        "and live updates reduced anxiety.",
+        "even during peak traffic windows.",
+        "enhancing brand trust and reliability.",
+        "with proactive resolution of address issues.",
+        "making every delivery feel premium."
+      ]
+    },
+    takeaway: {
+      starters: [
+        "Streamlined", "Effortless", "Swift", "Well-packaged", "Contact-free",
+        "Organized", "Time-saving", "Accurate", "App-savvy", "Smart", "Consistent",
+        "Hygienic", "Ready-on-time", "Barcode-verified"
+      ],
+      subjects: [
+        "takeaway handover process", "order verification system", "pickup counter flow",
+        "packaging integrity", "label clarity", "wait time management",
+        "staff readiness", "curbside pickup experience", "digital order accuracy",
+        "crowd avoidance strategy"
+      ],
+      endings: [
+        "with zero confusion at pickup.",
+        "delighting busy customers.",
+        "while preserving food freshness.",
+        "and minimizing physical contact.",
+        "using smart shelving and alerts.",
+        "contributing to a frictionless experience.",
+        "even during high-volume rushes.",
+        "with clear signage and quick service.",
+        "and consistent order matching.",
+        "boosting return rates for takeaway."
+      ]
+    },
+    dinein: {
+      starters: [
+        "Welcoming", "Attentive", "Ambience-driven", "Courteous", "Polished",
+        "Warm", "Personalized", "Responsive", "Charming", "Flawless", "Thoughtful",
+        "Relaxed", "Professional", "Fine-dining style"
+      ],
+      subjects: [
+        "table service rhythm", "guest greeting", "course pacing", "server knowledge",
+        "ambience comfort", "cleanliness standards", "beverage refill timing",
+        "order accuracy", "special accommodation", "waitstaff empathy"
+      ],
+      endings: [
+        "making guests feel genuinely valued.",
+        "and elevating the overall dining journey.",
+        "with silver service attention to detail.",
+        "while handling dietary requests seamlessly.",
+        "and creating memorable moments.",
+        "through proactive table maintenance.",
+        "with zero friction from entry to exit.",
+        "and consistent temperature checks.",
+        "contributing to 5-star reviews.",
+        "transforming meals into experiences."
+      ]
+    }
+  };
+
+  // Additional fallback generic words for robustness
+  const genericStarters = ["Excellent", "Outstanding", "Smooth", "Professional", "Quick", "Efficient", "Well-managed", "Impressive", "Fantastic", "Reliable"];
+  const genericSubjects = ["service experience", "team coordination", "order management", "customer support", "food preparation", "packaging quality", "restaurant ambience", "overall operations"];
+  const genericEndings = ["with minimal waiting time.", "ensuring high satisfaction.", "while maintaining quality standards.", "across all touchpoints."];
+
+  // current active preset state
+  let currentPreset = "delivery";   // default
+
+  // Helper to get category-specific array or fallback to generic
+  function getCategoryArray(preset, type) {
+    const catData = categoryLexicon[preset];
+    if (catData && catData[type] && catData[type].length > 0) {
+      return catData[type];
+    }
+    // safe fallbacks
+    if (type === 'starters') return genericStarters;
+    if (type === 'subjects') return genericSubjects;
+    if (type === 'endings') return genericEndings;
+    return genericStarters;
+  }
+
+  // ---------- SMART AI FEEDBACK GENERATOR (Context-Aware) ----------
+  // Additional complexity to feel more "AI" - uses category blending and 
+  // occasionally adds adverb or dynamic connectors to avoid repetition.
+  function createContextualAIFeedback(preset) {
+    const startersList = getCategoryArray(preset, 'starters');
+    const subjectsList = getCategoryArray(preset, 'subjects');
+    const endingsList = getCategoryArray(preset, 'endings');
+    
+    let start = startersList[Math.floor(Math.random() * startersList.length)];
+    let subject = subjectsList[Math.floor(Math.random() * subjectsList.length)];
+    let ending = endingsList[Math.floor(Math.random() * endingsList.length)];
+    
+    // 20% chance to add an extra flair / adverb making it more dynamic
+    const flairOptions = ["remarkably ", "exceptionally ", "consistently ", "proactively ", "insightfully "];
+    if (Math.random() < 0.25) {
+      const flair = flairOptions[Math.floor(Math.random() * flairOptions.length)];
+      start = `${flair}${start.toLowerCase()}`;
+      start = start.charAt(0).toUpperCase() + start.slice(1);
+    }
+    
+    // slightly vary sentence structure: sometimes add " — " for modern look
+    let connector = " ";
+    if (Math.random() < 0.2) {
+      connector = " · ";
+    }
+    
+    let feedback = `${start} ${subject} ${connector}${ending}`;
+    // ensure clean punctuation
+    if (!feedback.endsWith('.') && !feedback.endsWith('!') && !feedback.endsWith('?') ) {
+      feedback += ".";
+    }
+    // capitalize first letter if needed
+    return feedback;
+  }
+
+  // Function that respects current count and selected preset
+  function generateFeedbacks() {
+    const listContainer = document.getElementById('feedbackList');
+    if (!listContainer) return;
+    
+    // read count input
+    let countInput = document.getElementById('feedbackCount');
+    let count = parseInt(countInput?.value, 10);
+    if (isNaN(count) || count < 1) count = 1;
+    if (count > 15) count = 15;   // cap for readability
+    
+    // get currently active preset (global variable)
+    const activePreset = currentPreset;
+    
+    // Generate unique feedbacks - each call fresh contextual AI
+    const feedbackMessages = [];
+    for (let i = 0; i < count; i++) {
+      const msg = createContextualAIFeedback(activePreset);
+      feedbackMessages.push(msg);
+    }
+    
+    // render feedback cards
+    if (feedbackMessages.length === 0) {
+      listContainer.innerHTML = `<div class="empty-state">✨ No feedbacks generated. Try again.</div>`;
+      return;
+    }
+    
+    listContainer.innerHTML = '';
+    feedbackMessages.forEach((text, idx) => {
+      const card = document.createElement('div');
+      card.className = 'feedback-card';
+      
+      const numberDiv = document.createElement('div');
+      numberDiv.className = 'number';
+      numberDiv.innerText = (idx + 1).toString();
+      
+      const textDiv = document.createElement('div');
+      textDiv.className = 'feedback-text';
+      textDiv.innerText = text;
+      
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.innerHTML = '📋 Copy';
+      copyBtn.setAttribute('aria-label', 'Copy feedback');
+      copyBtn.onclick = (function(feedbackText, btnElement) {
+        return function() { copyFeedbackText(feedbackText, btnElement); };
+      })(text, copyBtn);
+      
+      card.appendChild(numberDiv);
+      card.appendChild(textDiv);
+      card.appendChild(copyBtn);
+      listContainer.appendChild(card);
+    });
+    
+    // subtle animation effect: smooth scroll to first card
+    const firstCard = listContainer.querySelector('.feedback-card');
+    if (firstCard) {
+      firstCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+  
+  // copy function with enhanced feedback (icon + text change)
+  function copyFeedbackText(text, buttonElement) {
+    if (!navigator.clipboard) {
+      // fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showCopyFeedback(buttonElement);
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      showCopyFeedback(buttonElement);
+    }).catch(() => {
+      // fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showCopyFeedback(buttonElement);
+    });
+  }
+  
+  function showCopyFeedback(btn) {
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '✅ Copied!';
+    btn.style.background = '#d9f0e1';
+    btn.style.color = '#0f3b2c';
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 1500);
+  }
+  
+  // Selection handler for preset tiles with active visual & state sync
+  function selectPreset(presetValue, tileElement) {
+    // update currentPreset variable
+    currentPreset = presetValue;
+    
+    // UI - toggle active class on all tiles
+    const allTiles = document.querySelectorAll('.tile');
+    allTiles.forEach(tile => {
+      tile.classList.remove('active');
+    });
+    tileElement.classList.add('active');
+    
+    // optional: you could optionally auto-generate feedbacks on preset change? but spec not required, but enhances ux!
+    // For better UX, we keep manual generate button, but we can show subtle hint, but untouched.
+    // but to feel responsive, we could generate feedback instantly once? Not mandatory, but nice!
+    // add a micro feedback on preset change: optionally regenerate using current count? avoid over-automation
+    // Based on "Add AI FeedBacks Generator" we already improved category based generation.
+    // We'll keep generate explicit – however we add optional dynamic placeholder message to indicate context changed
+    const feedbackListDiv = document.getElementById('feedbackList');
+    if (feedbackListDiv && feedbackListDiv.children.length > 0 && !feedbackListDiv.querySelector('.empty-state')) {
+      // do not auto generate to respect user control, but we can show a tip
+      // Not mandatory.
+    }
+  }
+  
+  // Additional initialization: ensure that on page load we can generate default feedbacks with demo count?
+  // for better first impression: automatically generate 2 sample feedbacks? by spec we want functional generator.
+  // we call generateFeedbacks after DOM ready to show something meaningful
+  window.addEventListener('DOMContentLoaded', () => {
+    // set default current preset as delivery (active tile already active)
+    // ensure the count input has proper event listeners (extra)
+    const countInput = document.getElementById('feedbackCount');
+    if (countInput) {
+      countInput.addEventListener('change', function(e) {
+        let val = parseInt(this.value, 10);
+        if (isNaN(val) || val < 1) this.value = 1;
+        if (val > 15) this.value = 15;
+      });
+    }
+    // generate 2 engaging samples to illustrate AI quality (non-intrusive but shows capability)
+    // but respecting user expectation, we call generateFeedbacks to show initial examples with default count=4
+    generateFeedbacks();
+  });
+  
+  // expose functions globally for onclick handlers
+  window.selectPreset = selectPreset;
+  window.generateFeedbacks = generateFeedbacks;
+  window.copyFeedbackText = copyFeedbackText; // fallback reference, but we use inline closure
+  
+  // additional AI augmentation: Provide dynamic contextual topic variance per generation call,
+  // already baked into createContextualAIFeedback – ensures each generated string looks smart & coherent.
+</script>
+</body>
+</html>
